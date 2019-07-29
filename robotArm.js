@@ -26,7 +26,7 @@ var vertexColors = [
     vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
     vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
     vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-    vec4( 1.0, 1.0, 1.0, 1.0 ),  // white
+    vec4( 0.1, 0.7, 0, 1.0 ),  // white
     vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
 ];
 
@@ -42,7 +42,9 @@ var UPPER_ARM_WIDTH  = 0.5;
 
 // Shader transformation matrices
 
-var modelViewMatrix, projectionMatrix;
+var modelViewMatrix=mat4();
+var ballMVM= mat4();
+var projectionMatrix;
 
 // Array of rotation angles (in degrees) for each rotation axis
 
@@ -57,7 +59,7 @@ var angle = 0;
 
 var modelViewMatrixLoc;
 
-var vBuffer, cBuffer;
+var vBuffer, cBuffer, bBuffer;
 
 //----------------------------------------------------------------------------
 
@@ -86,9 +88,78 @@ function colorCube() {
     quad( 5, 4, 0, 1 );
 }
 
-//____________________________________________
+//-------------------------------------------------------------------
+//recursive traversals
+var baseId=0;
+var lowerArmId=1;
+var upperArmId=2;
+var robotFigure= [];
+var mvStack= [];
 
-// Remmove when scale in MV.js supports scale matrices
+
+function createNode(transform, render, sibling, child) {
+		var node={
+			transform: transform,
+			render: render,
+			sibling: sibling,
+			child: child,
+		}
+
+		return node;
+}
+
+
+
+for(var i=0; i<3;i++){
+	robotFigure[i]= createNode(null,null,null,null);
+}
+
+function initNodes(id){
+	var m=mat4();
+	switch(id){
+		case baseId:
+			m=rotate(theta[Base],0,1,0);
+			robotFigure[baseId]=createNode(m,base,null,lowerArmId)
+			break;
+
+		case lowerArmId:
+			m = translate(0.0, BASE_HEIGHT, 0.0);
+			m = mult(m, rotate(theta[LowerArm], 0, 0, 1 ));
+			robotFigure[lowerArmId]=createNode(m,lowerArm,null,upperArmId)
+			break;
+
+		case upperArmId:
+			m=translate(0.0, LOWER_ARM_HEIGHT, 0.0);
+			m=mult(m, rotate(theta[UpperArm], 0, 0, 1) );
+			robotFigure[upperArmId]=createNode(m,upperArm,null,null);
+			break;
+
+	}
+}
+
+function traverse(id){
+	if(id==null){
+		return;
+	}
+
+	mvStack.push(modelViewMatrix);
+	modelViewMatrix= mult(modelViewMatrix, robotFigure[id].transform);
+	robotFigure[id].render();
+
+	if( robotFigure[id].child != null){
+		traverse(robotFigure[id].child)
+	}
+
+	modelViewMatrix= mvStack.pop();
+
+}
+
+
+
+
+//___________________________________________________________
+
+// Remove when scale in MV.js supports scale matrices
 
 function scale4(a, b, c) {
    var result = mat4();
@@ -111,7 +182,7 @@ window.onload = function init() {
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
 
-    gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+    gl.clearColor( 0.5, 0.5, 0.5, 1.0 );
     gl.enable( gl.DEPTH_TEST );
 
     //
@@ -147,19 +218,35 @@ window.onload = function init() {
     gl.enableVertexAttribArray( vColor );
 
     document.getElementById("slider1").onchange = function(event) {
-        theta[0] = event.target.value;
+        theta[baseId] = event.target.value;
+				initNodes(baseId);
     };
     document.getElementById("slider2").onchange = function(event) {
-         theta[1] = event.target.value;
+         theta[lowerArmId] = event.target.value;
+				 initNodes(lowerArmId);
     };
     document.getElementById("slider3").onchange = function(event) {
-         theta[2] =  event.target.value;
+         theta[upperArmId] =  event.target.value;
+				 initNodes(upperArmId);
     };
+
+		for(var i=0; i<3;i++){
+			initNodes(i);
+		}
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
     projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
     gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix) );
+
+
+		bBuffer= gl.createBuffer();
+		gl.bindBuffer( gl.ARRAY_BUFFER, bBuffer );
+		gl.bufferData( gl.ARRAY_BUFFER, flatten(ballVertices), gl.STATIC_DRAW );
+
+		var vPositionBall= gl.getAttribLocation( program, "vPosition" );
+		gl.vertexAttribPointer( vPositionBall, 3, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vPositionBall );
 
     render();
 }
@@ -200,21 +287,19 @@ function lowerArm()
 
 //----------------------------------------------------------------------------
 
-
 var render = function() {
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-    modelViewMatrix = rotate(theta[Base], 0, 1, 0 );
-    base();
+		gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+    traverse(baseId);
 
-    modelViewMatrix = mult(modelViewMatrix, translate(0.0, BASE_HEIGHT, 0.0));
-    modelViewMatrix = mult(modelViewMatrix, rotate(theta[LowerArm], 0, 0, 1 ));
-    lowerArm();
-
-    modelViewMatrix  = mult(modelViewMatrix, translate(0.0, LOWER_ARM_HEIGHT, 0.0));
-    modelViewMatrix  = mult(modelViewMatrix, rotate(theta[UpperArm], 0, 0, 1) );
-    upperArm();
+		//drawing the ball
+		gl.bindBuffer(gl.ARRAY_BUFFER,bBuffer);
+		gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix))
+		var ballmodelViewMatrix= mult(translate(0,0,0),ballMVM);
+		gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(ballmodelViewMatrix) );
+		gl.drawArrays(gl.LINE_STRIP, 0, ballVertices.length );
 
     requestAnimFrame(render);
 }
