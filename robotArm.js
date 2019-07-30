@@ -29,21 +29,21 @@ var vertexColors = [
     vec4( 0.1, 0.7, 0, 1.0 ),  // white
     vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
 ];
+var ballColors=[];
+
+for (var i=0;i<ballVertices.length;i++){
+  ballColors.push(vec4( 1.0, 0.0, 0.0, 1.0 ));
+}
 
 
 // Parameters controlling the size of the Robot's arm
 
-var BASE_HEIGHT      = 2.0;
-var BASE_WIDTH       = 5.0;
-var LOWER_ARM_HEIGHT = 5.0;
-var LOWER_ARM_WIDTH  = 0.5;
-var UPPER_ARM_HEIGHT = 5.0;
-var UPPER_ARM_WIDTH  = 0.5;
+
 
 // Shader transformation matrices
 
 var modelViewMatrix=mat4();
-var ballMVM= mat4();
+var ballmodelViewMatrix= mat4();
 var projectionMatrix;
 
 // Array of rotation angles (in degrees) for each rotation axis
@@ -58,8 +58,11 @@ var theta= [ 0, 0, 0];
 var angle = 0;
 
 var modelViewMatrixLoc;
+var projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
 
 var vBuffer, cBuffer, bBuffer;
+var vPosition;
+var vPositionBall, cBufferBall, vColorBall, vColor;
 
 //----------------------------------------------------------------------------
 
@@ -173,6 +176,7 @@ function scale4(a, b, c) {
 //--------------------------------------------------
 
 
+
 window.onload = function init() {
 
     canvas = document.getElementById( "gl-canvas" );
@@ -206,7 +210,7 @@ window.onload = function init() {
     gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
 
     var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
+    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
     cBuffer = gl.createBuffer();
@@ -234,19 +238,23 @@ window.onload = function init() {
 			initNodes(i);
 		}
 
-    modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
-
-    projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
-    gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix) );
-
-
 		bBuffer= gl.createBuffer();
 		gl.bindBuffer( gl.ARRAY_BUFFER, bBuffer );
 		gl.bufferData( gl.ARRAY_BUFFER, flatten(ballVertices), gl.STATIC_DRAW );
 
 		var vPositionBall= gl.getAttribLocation( program, "vPosition" );
 		gl.vertexAttribPointer( vPositionBall, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPositionBall );
+    // gl.enableVertexAttribArray( vPositionBall );
+
+    cBufferBall=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,cBufferBall);
+    gl.bufferData(gl.ARRAY_BUFFER,flatten(ballColors),gl.STATIC_DRAW);
+
+    // var vColorBall= gl.getAttribLocation(program, "vColor");
+    // gl.vertexAttribPointer(vColorBall,4,gl.FLOAT,false,0,0);
+    // gl.enableVertexAttribArray( vColorBall );
+
+    modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
     render();
 }
@@ -286,20 +294,29 @@ function lowerArm()
 }
 
 //----------------------------------------------------------------------------
+// var ballmodelViewMatrix= mult(scalem(0.35,0.35,1),ballmodelViewMatrix); //sizes the circle ball
+var ballmodelViewMatrix= mult(scalem(0.35,0.35,1),mat4()); //sizes the circle ball
 
 var render = function() {
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-		gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.vertexAttribPointer(vPosition,4,gl.FLOAT,false,0,0);
+    gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix) );
+    gl.uniformMatrix4fv( modelViewMatrixLoc,  false, flatten(modelViewMatrix) );
     traverse(baseId);
 
 		//drawing the ball
-		gl.bindBuffer(gl.ARRAY_BUFFER,bBuffer);
-		gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix))
-		var ballmodelViewMatrix= mult(translate(0,0,0),ballMVM);
-		gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(ballmodelViewMatrix) );
-		gl.drawArrays(gl.LINE_STRIP, 0, ballVertices.length );
+    if(ballLive== true){
+      gl.bindBuffer(gl.ARRAY_BUFFER,bBuffer);
+      gl.vertexAttribPointer(vColorBall,4,gl.FLOAT,false,0,0);
+  		gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix))
+  		gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(ballmodelViewMatrix) );
+
+  		gl.drawArrays(gl.TRIANGLE_FAN, 0, ballVertices.length );
+
+    }
 
     requestAnimFrame(render);
 }
