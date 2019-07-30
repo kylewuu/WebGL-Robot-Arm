@@ -164,7 +164,7 @@ function traverse(id){
 
 // Remove when scale in MV.js supports scale matrices
 
-function scale4(a, b, c) {
+function scalem(a, b, c) {
    var result = mat4();
    result[0][0] = a;
    result[1][1] = b;
@@ -228,6 +228,7 @@ window.onload = function init() {
     document.getElementById("slider2").onchange = function(event) {
          theta[lowerArmId] = event.target.value;
 				 initNodes(lowerArmId);
+         console.log(theta[lowerArmId]);
     };
     document.getElementById("slider3").onchange = function(event) {
          theta[upperArmId] =  event.target.value;
@@ -263,7 +264,7 @@ window.onload = function init() {
 
 
 function base() {
-    var s = scale4(BASE_WIDTH, BASE_HEIGHT, BASE_WIDTH);
+    var s = scalem(BASE_WIDTH, BASE_HEIGHT, BASE_WIDTH);
     var instanceMatrix = mult( translate( 0.0, 0.5 * BASE_HEIGHT, 0.0 ), s);
     var t = mult(modelViewMatrix, instanceMatrix);
     gl.uniformMatrix4fv(modelViewMatrixLoc,  false, flatten(t) );
@@ -274,7 +275,7 @@ function base() {
 
 
 function upperArm() {
-    var s = scale4(UPPER_ARM_WIDTH, UPPER_ARM_HEIGHT, UPPER_ARM_WIDTH);
+    var s = scalem(UPPER_ARM_WIDTH, UPPER_ARM_HEIGHT, UPPER_ARM_WIDTH);
     var instanceMatrix = mult(translate( 0.0, 0.5 * UPPER_ARM_HEIGHT, 0.0 ),s);
     var t = mult(modelViewMatrix, instanceMatrix);
     gl.uniformMatrix4fv( modelViewMatrixLoc,  false, flatten(t) );
@@ -286,7 +287,7 @@ function upperArm() {
 
 function lowerArm()
 {
-    var s = scale4(LOWER_ARM_WIDTH, LOWER_ARM_HEIGHT, LOWER_ARM_WIDTH);
+    var s = scalem(LOWER_ARM_WIDTH, LOWER_ARM_HEIGHT, LOWER_ARM_WIDTH);
     var instanceMatrix = mult( translate( 0.0, 0.5 * LOWER_ARM_HEIGHT, 0.0 ), s);
     var t = mult(modelViewMatrix, instanceMatrix);
     gl.uniformMatrix4fv( modelViewMatrixLoc,  false, flatten(t) );
