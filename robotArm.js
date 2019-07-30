@@ -317,6 +317,67 @@ var render = function() {
 
   		gl.drawArrays(gl.TRIANGLE_FAN, 0, ballVertices.length );
 
+			//animating the arms over
+
+			if (thetaL<0 && thetaU<0){
+				if(theta[LowerArm]>=thetaL){
+					theta[LowerArm]-=1;
+					initNodes(lowerArmId);
+				}
+				if(theta[UpperArm]>=thetaU){
+					theta[UpperArm]-=1;
+					initNodes(upperArmId);
+				}
+				if(theta[UpperArm]<=thetaU && (theta[LowerArm]<=thetaL)){
+					ballLive=false;
+				}
+			}
+
+			else if (thetaL>0 && thetaU<0){
+				if(theta[LowerArm]<=thetaL){
+					theta[LowerArm]+=1;
+					initNodes(lowerArmId);
+				}
+				if(theta[UpperArm]>=thetaU){
+					theta[UpperArm]-=1;
+					initNodes(upperArmId);
+				}
+				if(theta[UpperArm]<=thetaU && (theta[LowerArm]>=thetaL)){
+					ballLive=false;
+				}
+			}
+
+			else if (thetaL<0 && thetaU>0){
+				if(theta[LowerArm]>=thetaL){
+					theta[LowerArm]-=1;
+					initNodes(lowerArmId);
+				}
+				if(theta[UpperArm]<=thetaU){
+					theta[UpperArm]+=1;
+					initNodes(upperArmId);
+				}
+				if(theta[UpperArm]>=thetaU && (theta[LowerArm]<=thetaL)){
+					ballLive=false;
+				}
+			}
+
+			else if (thetaL>0 && thetaU>0){
+				if(theta[LowerArm]<=thetaL){
+					theta[LowerArm]+=1;
+					initNodes(lowerArmId);
+
+
+				}
+				if(theta[UpperArm]<=thetaU){
+					theta[UpperArm]+=1;
+					initNodes(upperArmId);
+				}
+				if(theta[UpperArm]>=thetaU && (theta[LowerArm]>=thetaL)){
+					ballLive=false;
+
+				}
+			}
+
     }
 
     requestAnimFrame(render);
