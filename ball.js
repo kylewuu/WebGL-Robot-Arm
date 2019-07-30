@@ -57,17 +57,23 @@ canvas.addEventListener("click",function (e){
 	}
 
 	//IK calculations-----------------------
-	var xe= ballMouseLocation[0];
-	var ye= ballMouseLocation[1]-1.55;
+	var xe= ballMouseLocation[0]+0.4;
+	var ye= ballMouseLocation[1]-1.45;
 	var lLower= LOWER_ARM_HEIGHT;
 	var lUpper= UPPER_ARM_HEIGHT;
 	var thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
 	// console.log(thetar);
-	console.log(ballMouseLocation[0],ballMouseLocation[1]);
-
+	// console.log(ballMouseLocation[0],ballMouseLocation[1]);
 
 	theta[LowerArm]=((thetar-(Math.acos(((Math.pow(lLower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(lUpper,2)))/(2*lLower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90;
 	theta[UpperArm]=(Math.PI-(Math.acos(((Math.pow(lLower,2))+(Math.pow(lUpper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lLower*lUpper))))*(180/Math.PI);
+
+	// var thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
+	// // console.log(thetar);
+	// console.log(ballMouseLocation[0],ballMouseLocation[1]);
+	//
+	// theta[LowerArm]=((thetar-(Math.acos(((Math.pow(lLower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(lUpper,2)))/(2*lLower))))*(180/Math.PI))-90;
+	// theta[UpperArm]=(Math.PI-(Math.acos(((Math.pow(lLower,2))+(Math.pow(lUpper,2)))/(2*lLower*lUpper))))*(180/Math.PI);
 
 	console.log(theta[LowerArm]);
 	console.log(theta[UpperArm]);
