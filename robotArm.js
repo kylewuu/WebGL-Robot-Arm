@@ -63,6 +63,7 @@ var projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
 var vBuffer, cBuffer, bBuffer;
 var vPosition;
 var vPositionBall, cBufferBall, vColorBall, vColor;
+var thetaBaseTemp, thetaLowerTemp, thetaUpperTemp;
 
 //----------------------------------------------------------------------------
 
@@ -222,17 +223,19 @@ window.onload = function init() {
     gl.enableVertexAttribArray( vColor );
 
     document.getElementById("slider1").onchange = function(event) {
-        theta[baseId] = event.target.value;
-				initNodes(baseId);
+        // theta[baseId] = event.target.value;
+        thetaBaseTemp=event.target.value;
+				// initNodes(baseId);
     };
     document.getElementById("slider2").onchange = function(event) {
-         theta[lowerArmId] = event.target.value;
-				 initNodes(lowerArmId);
-         console.log(theta[lowerArmId]);
+         // theta[lowerArmId] = event.target.value;
+				 // initNodes(lowerArmId);
+         thetaLowerTemp=event.target.value;
     };
     document.getElementById("slider3").onchange = function(event) {
-         theta[upperArmId] =  event.target.value;
-				 initNodes(upperArmId);
+         // theta[upperArmId] =  event.target.value;
+				 // initNodes(upperArmId);
+         thetaUpperTemp=event.target.value;
     };
 
 		for(var i=0; i<3;i++){
@@ -294,6 +297,7 @@ function lowerArm()
     gl.drawArrays( gl.TRIANGLES, 0, NumVertices );
 }
 
+
 //----------------------------------------------------------------------------
 // var ballmodelViewMatrix= mult(scalem(0.35,0.35,1),ballmodelViewMatrix); //sizes the circle ball
 var ballmodelViewMatrix= mult(scalem(0.35,0.35,1),mat4()); //sizes the circle ball
@@ -311,6 +315,7 @@ var render = function() {
 		//drawing the ball
     if(ballLive== true){
       gl.bindBuffer(gl.ARRAY_BUFFER,bBuffer);
+      // gl.bufferData(gl.ARRAY_BUFFER,flatten(ballColors),gl.STATIC_DRAW);
       gl.vertexAttribPointer(vColorBall,4,gl.FLOAT,false,0,0);
   		gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix))
   		gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(ballmodelViewMatrix) );
@@ -330,6 +335,11 @@ var render = function() {
 				}
 				if(theta[UpperArm]<=thetaU && (theta[LowerArm]<=thetaL)){
 					ballLive=false;
+
+          thetaBaseTemp=0;
+          thetaLowerTemp=0;
+          thetaUpperTemp=0;
+
 				}
 			}
 
@@ -344,6 +354,10 @@ var render = function() {
 				}
 				if(theta[UpperArm]<=thetaU && (theta[LowerArm]>=thetaL)){
 					ballLive=false;
+
+          thetaBaseTemp=0;
+          thetaLowerTemp=0;
+          thetaUpperTemp=0;
 				}
 			}
 
@@ -358,6 +372,10 @@ var render = function() {
 				}
 				if(theta[UpperArm]>=thetaU && (theta[LowerArm]<=thetaL)){
 					ballLive=false;
+
+          thetaBaseTemp=0;
+          thetaLowerTemp=0;
+          thetaUpperTemp=0;
 				}
 			}
 
@@ -375,10 +393,42 @@ var render = function() {
 				if(theta[UpperArm]>=thetaU && (theta[LowerArm]>=thetaL)){
 					ballLive=false;
 
+          thetaBaseTemp=0;
+          thetaLowerTemp=0;
+          thetaUpperTemp=0;
+
 				}
 			}
 
     }
+    if(ballLive==false){
+      if(theta[baseId]>thetaBaseTemp){
+        theta[baseId]-=1;
+        initNodes(baseId);
+      }
+      else if(theta[baseId]<thetaBaseTemp){
+        theta[baseId]+=1;
+        initNodes(baseId);
+      }
+
+      if(theta[lowerArmId]>thetaLowerTemp){
+        theta[lowerArmId]-=1;
+        initNodes(lowerArmId);
+      }
+      else if(theta[lowerArmId]<thetaLowerTemp){
+        theta[lowerArmId]+=1;
+        initNodes(lowerArmId);
+      }
+      if(theta[upperArmId]>thetaUpperTemp){
+        theta[upperArmId]-=1;
+        initNodes(upperArmId);
+      }
+      else if(theta[upperArmId]<thetaUpperTemp){
+        theta[upperArmId]+=1;
+        initNodes(upperArmId);
+      }
+    }
+
 
     requestAnimFrame(render);
 }

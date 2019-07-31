@@ -65,8 +65,15 @@ canvas.addEventListener("click",function (e){
 	var lLower= LOWER_ARM_HEIGHT;
 	var lUpper= UPPER_ARM_HEIGHT;
 	var thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
-	theta[LowerArm]=0;
-	theta[UpperArm]=0;
+	document.getElementById("slider1").value="0";
+	document.getElementById("slider2").value="0";
+	document.getElementById("slider3").value="0";
+	theta[baseId]=0;
+	theta[lowerArmId]=0;
+	theta[upperArmId]=0;
+	initNodes(baseId);
+	initNodes(lowerArmId);
+	initNodes(upperArmId);
 
 
 	// console.log(thetar);
