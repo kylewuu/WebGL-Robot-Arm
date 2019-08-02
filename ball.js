@@ -75,6 +75,8 @@ canvas.addEventListener("click",function (e){
 	initNodes(lowerArmId);
 	initNodes(upperArmId);
 
+	console.log(xe,ye)
+
 
 	// console.log(thetar);
 	// console.log(ballMouseLocation[0],ballMouseLocation[1]);
@@ -82,6 +84,14 @@ canvas.addEventListener("click",function (e){
 	thetaL=((thetar-(Math.acos(((Math.pow(lLower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(lUpper,2)))/(2*lLower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90;
 	thetaU=(Math.PI-(Math.acos(((Math.pow(lLower,2))+(Math.pow(lUpper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lLower*lUpper))))*(180/Math.PI);
 
+	if(ye<0){
+		ye=-(ballMouseLocation[1]-1.45);
+		xe=-(ballMouseLocation[0]+0.4);
+		thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
+		thetaL=180+(((thetar-(Math.acos(((Math.pow(lLower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(lUpper,2)))/(2*lLower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90);
+		thetaU=(Math.PI-(Math.acos(((Math.pow(lLower,2))+(Math.pow(lUpper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lLower*lUpper))))*(180/Math.PI);
+
+	}
 	// var thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
 	// // console.log(thetar);
 	// console.log(ballMouseLocation[0],ballMouseLocation[1]);
@@ -93,7 +103,7 @@ canvas.addEventListener("click",function (e){
 	// initNodes(lowerArmId);
 	// initNodes(upperArmId);
 
-	console.log(thetaL, thetaU);
+	console.log("theta",thetaL, thetaU);
 
 
 	ballLive=true;
